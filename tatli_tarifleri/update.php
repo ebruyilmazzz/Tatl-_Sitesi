@@ -5,7 +5,7 @@ include 'baglanti.php';
 if (isset($_GET['id']) && !empty($_GET['id'])) {
     $id = intval($_GET['id']);
 
-    $query = $baglanti->prepare("SELECT * FROM urunler WHERE id = ?");
+    $query = $baglanti->prepare("SELECT * FROM desserts WHERE id = ?");
     if ($query) {
         $query->bind_param("i", $id);
         $query->execute();
@@ -22,16 +22,15 @@ if (isset($_GET['id']) && !empty($_GET['id'])) {
     die("Geçersiz işlem.");
 }
 
-// Form gönderildiğinde güncelleme işlemi
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $id = intval($_POST['id']);
-    $urun_adi = $_POST['urun_adi'];
-    $urun_bilgi = $_POST['urun_bilgi'];
-    $urun_resmi = $_POST['urun_resmi'];
+    $product_name = $_POST['product_name'];
+    $product_info = $_POST['product_info'];
+    $product_img = $_POST['product_img'];
 
-    $query = $baglanti->prepare("UPDATE urunler SET urun_adi = ?, urun_bilgi = ?, urun_resmi = ? WHERE id = ?");
+    $query = $baglanti->prepare("UPDATE desserts SET product_name = ?, product_info = ?, product_img = ? WHERE id = ?");
     if ($query) {
-        $query->bind_param("sssi", $urun_adi, $urun_bilgi, $urun_resmi, $id);
+        $query->bind_param("sssi", $product_name, $product_info, $product_img, $id);
         $query->execute();
 
         if ($query->affected_rows >= 0) {
@@ -61,12 +60,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <form method="post">
                 <input type="hidden" name="id" value="<?= htmlspecialchars($urun['id']); ?>">
                 <div class="mb-3">
-                    <label for="urun_adi" class="form-label">Ürün Adı</label>
-                    <input type="text" class="form-control" id="urun_adi" name="urun_adi" value="<?= htmlspecialchars($urun['urun_adi']); ?>" required>
+                    <label for="product_name" class="form-label">Ürün Adı</label>
+                    <input type="text" class="form-control" id="product_name" name="product_name" value="<?= htmlspecialchars($urun['product_name']); ?>" required>
                 </div>
                 <div class="mb-3">
-                    <label for="urun_bilgi" class="form-label">Ürün Bilgisi</label>
-                    <input type="text" class="form-control" id="urun_bilgi" name="urun_bilgi" value="<?= htmlspecialchars($urun['urun_bilgi']); ?>" required>
+                    <label for="product_info" class="form-label">Ürün Bilgisi</label>
+                    <input type="text" class="form-control" id="product_info" name="product_info" value="<?= htmlspecialchars($urun['product_info']); ?>" required>
                 </div>
                 <div class="mb-3">
                     <label for="urun_resmi" class="form-label">Ürün Resmi</label>

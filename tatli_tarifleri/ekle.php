@@ -11,27 +11,27 @@ if (isset($_GET['cikis'])) {
 
 // Yeni ürün ekleme işlemi
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $urun_adi = $_POST['urun_adi'];
-    $urun_bilgi = $_POST['urun_bilgi'];
-    $kategori = $_POST['kategori'];
-    $urun_resmi = $_POST['urun_resmi'];
+    $product_name = $_POST['product_name'];
+    $product_info = $_POST['product_info'];
+    $category_id = $_POST['category_id'];
+    $product_img = $_POST['product_img'];
 
     // Kategoriye göre hedef tablo belirleme
     $target_table = '';
-    if ($kategori == 'Çikolatalı Tatlılar') {
-        $target_table = 'cikolatali_tatlilar';
-    } elseif ($kategori == 'Pratik Tatlılar') {
+    if ($category_id == 1) {
+        $target_table = 'desserts';
+    } elseif ($category_id == 2) {
         $target_table = 'pratik_tatlilar';
-    } elseif ($kategori == 'Meyveli Tatlılar') {
+    } elseif ($category_id == 3) {
         $target_table = 'meyveli_tatlilar';
     } else {
         echo '<div class="alert alert-danger">Geçersiz kategori seçildi!</div>';
         exit();
     }
 
-    // Dinamik tabloya veri ekleme
-    $query = $baglanti->prepare("INSERT INTO $target_table (urun_adi, urun_bilgi, urun_resmi) VALUES (?, ?, ?)");
-    $query->bind_param("sss", $urun_adi, $urun_bilgi, $urun_resmi);
+
+    $query = $baglanti->prepare("INSERT INTO desserts (product_name, product_info, product_img, category_id) VALUES (?, ?, ?,?)");
+    $query->bind_param("sssi", $product_name, $product_info, $product_img,$category_id);    
     $query->execute();
 
     if ($query->affected_rows > 0) {
@@ -58,27 +58,28 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
         <form method="POST" action="ekle.php">
             <div class="mb-3">
-                <label for="urun_adi" class="form-label">Ürün Adı</label>
-                <input type="text" class="form-control" id="urun_adi" name="urun_adi" required>
+                <label for="product_name" class="form-label">Ürün Adı</label>
+                <input type="text" class="form-control" id="product_name" name="product_name" required>
             </div>
 
             <div class="mb-3">
-                <label for="urun_bilgi" class="form-label">Ürün Bilgisi</label>
-                <textarea class="form-control" id="urun_bilgi" name="urun_bilgi" rows="3" required></textarea>
+                <label for="product_info" class="form-label">Ürün Bilgisi</label>
+                <textarea class="form-control" id="product_info" name="product_info" rows="3" required></textarea>
             </div>
 
             <div class="mb-3">
-                <label for="kategori" class="form-label">Kategori</label>
-                <select class="form-select" id="kategori" name="kategori" required>
-                    <option value="Çikolatalı Tatlılar">Çikolatalı Tatlılar</option>
-                    <option value="Pratik Tatlılar">Pratik Tatlılar</option>
-                    <option value="Meyveli Tatlılar">Meyveli Tatlılar</option>
-                </select>
+                <label for="category_id" class="form-label">Kategori</label>
+                <select class="form-select" id="category_id" name="category_id" required>
+                <option value="1">Çikolatalı Tatlılar</option>
+                <option value="2">Pratik Tatlılar</option>
+                <option value="3">Meyveli Tatlılar</option>
+            </select>
+
             </div>
 
             <div class="mb-3">
-                <label for="urun_resmi" class="form-label">Ürün Resmi URL</label>
-                <input type="text" class="form-control" id="urun_resmi" name="urun_resmi" required>
+                <label for="product_img" class="form-label">Ürün Resmi URL</label>
+                <input type="text" class="form-control" id="product_img" name="product_img" required>
             </div>
 
             <button type="submit" class="btn btn-primary">Ürünü Ekle</button>

@@ -1,6 +1,12 @@
 <?php
 include 'baglanti.php';
-session_start(); // Oturum başlatma
+session_start();
+
+// Admin girişi kontrolü
+if (!isset($_SESSION['admin']) || $_SESSION['admin'] !== true) {
+    header("Location: adminlogin.php");
+    exit();
+}
 
 // Çıkış işlemi
 if (isset($_GET['cikis'])) {
@@ -9,63 +15,35 @@ if (isset($_GET['cikis'])) {
     exit();
 }
 
-// Silme işlemi
+
 if (isset($_GET['sil'])) {
     $urun_id = intval($_GET['sil']);
     
-    // Kategoriye göre doğru tabloyu belirleme
     $kategori = isset($_GET['kategori']) ? urldecode($_GET['kategori']) : '';
     $target_table = '';
 
-    // Kategoriyi kontrol et ve tabloyu belirle
     if ($kategori == 'Çikolatalı Tatlılar') {
-        $target_table = 'cikolatali_tatlilar';
+        $target_table = 'desserts';
     } elseif ($kategori == 'Pratik Tatlılar') {
         $target_table = 'pratik_tatlilar';
     } elseif ($kategori == 'Meyveli Tatlılar') {
         $target_table = 'meyveli_tatlilar';
-    } else {
-        // Kategori yoksa default bir tablo belirle
-        $target_table = 'urunler';
     }
+    
 
-    // Doğru tablodan silme işlemi
-    $query = $baglanti->prepare("DELETE FROM $target_table WHERE id = ?");
-    $query->bind_param("i", $urun_id);
-    $query->execute();
-
-    if ($query->affected_rows > 0) {
-        header("Location: admin.php?message=success");
+    if ($target_table) {
+        $sql = "DELETE FROM $target_table WHERE id = ?";
+        $stmt = $baglanti->prepare($sql);
+        $stmt->bind_param("i", $urun_id);
+        
+        if ($stmt->execute()) {
+            header("Location: admin.php?mesaj=silindi");
+        } else {
+            header("Location: admin.php?mesaj=hata");
+        }
         exit();
-    } else {
-        echo '<div class="alert alert-danger">Ürün silinemedi. ID bulunamadı.</div>';
     }
 }
-
-// Ürünleri listele
-$kategori = isset($_GET['kategori']) ? urldecode($_GET['kategori']) : ''; // URL'den kategori al
-$target_table = ''; // Hedef tablo
-
-// Kategoriye göre doğru tabloyu belirle
-if ($kategori == 'Çikolatalı Tatlılar') {
-    $target_table = 'cikolatali_tatlilar';
-} elseif ($kategori == 'Pratik Tatlılar') {
-    $target_table = 'pratik_tatlilar';
-} elseif ($kategori == 'Meyveli Tatlılar') {
-    $target_table = 'meyveli_tatlilar';
-} else {
-    // Eğer kategori seçilmemişse, genel tablodan ürünleri al
-    $target_table = 'urunler';
-}
-
-$query = $baglanti->prepare("SELECT * FROM $target_table");
-$query->execute();
-$result = $query->get_result();
-
-if (!$result) {
-    die("Sorgu çalıştırma hatası: " . $baglanti->error);
-}
-
 ?>
 
 <!DOCTYPE html>
@@ -73,71 +51,109 @@ if (!$result) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ürün Yönetim Sistemi</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <title>Admin Paneli - Tatlı Tarifleri</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .admin-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+        }
+        .admin-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .recipe-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        .recipe-table th, .recipe-table td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+        .recipe-table th {
+            background-color: #f5f5f5;
+        }
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        .btn-ekle {
+            background-color: #4CAF50;
+        }
+        .btn-duzenle {
+            background-color: #2196F3;
+        }
+        .btn-sil {
+            background-color: #f44336;
+        }
+        .message {
+            padding: 10px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+        }
+        .message.success {
+            background-color: #dff0d8;
+            color: #3c763d;
+        }
+        .message.error {
+            background-color: #f2dede;
+            color: #a94442;
+        }
+    </style>
 </head>
 <body>
-    <div class="container mt-4">
-        <h2 class="text-center">Ürün Yönetim Sistemi</h2>
-
-        <!-- Mesaj Gösterimi -->
-        <?php if (isset($_GET['message'])): ?>
-            <div class="alert alert-success">
-                <?php
-                if ($_GET['message'] == 'success') echo "Ürün başarıyla silindi!";
-                elseif ($_GET['message'] == 'updated') echo "Ürün başarıyla güncellendi!";
-                elseif ($_GET['message'] == 'added') echo "Ürün başarıyla eklendi!";
-                ?>
+    <div class="admin-container">
+        <div class="admin-header">
+            <h1>Tatlı Tarifleri Yönetim Paneli</h1>
+            <div class="action-buttons">
+                <a href="ekle.php" class="btn btn-ekle">Yeni Tarif Ekle</a>
+                <a href="admin.php?cikis=1" class="btn btn-sil">Çıkış Yap</a>
             </div>
+        </div>
+
+        <?php if(isset($_GET['mesaj'])): ?>
+            <?php if($_GET['mesaj'] == 'silindi'): ?>
+                <div class="message success">Tarif başarıyla silindi.</div>
+            <?php elseif($_GET['mesaj'] == 'hata'): ?>
+                <div class="message error">İşlem sırasında bir hata oluştu.</div>
+            <?php endif; ?>
         <?php endif; ?>
 
-        <!-- Kategori Seçimi -->
-        <div class="mb-3">
-            <a href="admin.php" class="btn btn-outline-secondary">Tüm Kategoriler</a>
-            <a href="admin.php?kategori=Çikolatalı%20Tatlılar" class="btn btn-outline-dark">Çikolatalı Tatlılar</a>
-            <a href="admin.php?kategori=Pratik%20Tatlılar" class="btn btn-outline-dark">Pratik Tatlılar</a>
-            <a href="admin.php?kategori=Meyveli%20Tatlılar" class="btn btn-outline-dark">Meyveli Tatlılar</a>
-        </div>
-
-        <!-- Yeni Ürün Ekle Butonu -->
-        <div class="mb-3">
-            <a href="ekle.php" class="btn btn-primary">Yeni Ürün Ekle</a>
-            <a href="admin.php?cikis=true" class="btn btn-danger">Çıkış Yap</a>
-        </div>
-
-        <!-- Ürün Listesi -->
-        <table class="table table-striped">
-            <thead>
-                <tr>
-                    <th>Ürün ID</th>
-                    <th>Ürün Adı</th>
-                    <th>Ürün Bilgisi</th>
-                    <th>Ürün Resmi</th>
-                    <th>Kategori</th>
-                    <th>Sil</th>
-                    <th>Güncelle</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php if ($result->num_rows > 0): ?>
-                    <?php while ($urun = $result->fetch_assoc()): ?>
-                        <tr>
-                            <td><?= htmlspecialchars($urun['id']); ?></td>
-                            <td><?= htmlspecialchars($urun['urun_adi']); ?></td>
-                            <td><?= htmlspecialchars($urun['urun_bilgi']); ?></td>
-                            <td><img src="<?= htmlspecialchars($urun['urun_resmi']); ?>" alt="Ürün Resmi" width="50"></td>
-                            <td><?= htmlspecialchars($urun['kategori']); ?></td>
-                            <td><a href="admin.php?sil=<?= $urun['id']; ?>&kategori=<?= urlencode($kategori); ?>" class="btn btn-danger btn-sm" onclick="return confirm('Bu ürünü silmek istediğinizden emin misiniz?');">Sil</a></td>
-                            <td><a href="update.php?id=<?= $urun['id']; ?>" class="btn btn-success btn-sm">Güncelle</a></td>
-                        </tr>
-                    <?php endwhile; ?>
-                <?php else: ?>
+        <div class="recipes-section">
+            <h2>Çikolatalı Tatlılar</h2>
+            <table class="recipe-table">
+                <thead>
                     <tr>
-                        <td colspan="7" class="text-center">Hiç ürün bulunamadı.</td>
+                        <th>ID</th>
+                        <th>Başlık</th>
+                        <th>Açıklama</th>
+                        <th>İşlemler</th>
                     </tr>
-                <?php endif; ?>
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                    <?php
+                    $sql = "SELECT * FROM desserts ORDER BY id DESC";
+                    $result = $baglanti->query($sql);
+                    while($row = $result->fetch_assoc()):
+                    ?>
+                    <tr>
+                        <td><?php echo $row['id']; ?></td>
+                        <td><?php echo $row['product_name']; ?></td>
+                        <td><?php echo substr($row['product_info'], 0, 100) . '...'; ?></td>
+                        <td class="action-buttons">
+                            <a href="update.php?id=<?php echo $row['id']; ?>&kategori=Çikolatalı Tatlılar" class="btn btn-duzenle">Düzenle</a>
+                            <a href="admin.php?sil=<?php echo $row['id']; ?>&kategori=Çikolatalı Tatlılar" class="btn btn-sil" onclick="return confirm('Bu tarifi silmek istediğinizden emin misiniz?')">Sil</a>
+                        </td>
+                    </tr>
+                    <?php endwhile; ?>
+                </tbody>
+            </table>          
+        </div>
     </div>
 </body>
 </html>

@@ -3,7 +3,7 @@
 $host = 'localhost';     // Veritabanı sunucusu
 $kullanici = 'root';     // Veritabanı kullanıcı adı
 $sifre = '';             // Veritabanı şifresi
-$veritabani = 'uyeler';  // Veritabanı adı
+$veritabani = 'sweet_recipes';  // Veritabanı adı
 
 // Veritabanı bağlantısını oluşturma
 $baglanti = new mysqli($host, $kullanici, $sifre, $veritabani);

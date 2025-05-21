@@ -2,22 +2,21 @@
 $servername = "localhost";
 $username = "root";
 $password = "";
-$dbname = "uyeler";
+$dbname = "sweet_recipes";
 
-// Create connection
 $conn = new mysqli($servername, $username, $password, $dbname);
-// Check connection
+
 if ($conn->connect_error) {
   die("Connection failed: " . $conn->connect_error);
 }
 
-$sql = "SELECT * FROM urunler";
+$sql = "SELECT * FROM desserts";
 $result = $conn->query($sql);
 
 if ($result->num_rows > 0) {
-  // output data of each row
+
   while($row = $result->fetch_assoc()) {
-    echo "id: " . $row["id"]. " - Ürün adı: " . $row["urun_adi"]. " urun bilgisi: " . $row["urun_bilgi"]. "<br>";
+    echo "id: " . $row["id"]. " - Ürün adı: " . $row["product_name"]. " urun bilgisi: " . $row["product_info"]. "<br>";
   }
 } else {
   echo "0 results";
