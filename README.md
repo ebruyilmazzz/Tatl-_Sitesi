@@ -45,6 +45,6 @@ Bu proje MIT lisansı ile lisanslanmıştır.
 
 ![image](https://github.com/user-attachments/assets/8ac6a6ad-0a9f-4ce4-958a-37914897efb0)
 ![image](https://github.com/user-attachments/assets/84df45c0-aec6-499d-b590-94cd7dc90e7a)
-![image](https://github.com/user-attachments/assets/11024255-956a-441c-8e8b-
+![image](https://github.com/user-attachments/assets/11024255-956a-441c-8e8b-a2a31b9e7664)
 ![image](https://github.com/user-attachments/assets/6657d3d8-f558-4b85-b24c-b7161b8b7db5)
-a2a31b9e7664)
+
