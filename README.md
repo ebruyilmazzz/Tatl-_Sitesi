@@ -41,7 +41,8 @@ Pull request'ler ve öneriler memnuniyetle karşılanır. Lütfen önce bir issu
 
 ## Lisans
 Bu proje MIT lisansı ile lisanslanmıştır.
-<hr>
+<br>
+
 ![image](https://github.com/user-attachments/assets/8ac6a6ad-0a9f-4ce4-958a-37914897efb0)
 ![image](https://github.com/user-attachments/assets/84df45c0-aec6-499d-b590-94cd7dc90e7a)
 ![image](https://github.com/user-attachments/assets/11024255-956a-441c-8e8b-
